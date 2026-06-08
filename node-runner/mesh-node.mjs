@@ -12,7 +12,7 @@
  *   node mesh-node.mjs                       -> join the mesh and stand by for verified skills
  *   node mesh-node.mjs --input 21 --once     -> run one verified skill and exit (proof mode)
  */
-import Hyperswarm from 'hyperswarm';
+import { createRequire } from 'node:module';
 import b4a from 'b4a';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -167,6 +167,21 @@ console.log('   transport: public Hyperswarm DHT, NAT hole-punch, no open ports'
 console.log(OWNER_WALLET
   ? `   wallet   : ${OWNER_WALLET.slice(0, 4)}…${OWNER_WALLET.slice(-4)} — compute attributed to this Solana owner`
   : '   wallet   : unattributed (no wallet) — add --wallet <SOL_ADDRESS> to attribute your contribution');
+
+// Lazy-load the DHT transport (a native addon) HERE — after config + the banner —
+// so a Node version without a prebuild yields a friendly message and a pointer to
+// the offline proof, instead of a raw addon stack trace at import time.
+const require = createRequire(import.meta.url);
+let Hyperswarm;
+try {
+  Hyperswarm = require('hyperswarm');
+} catch (e) {
+  console.error('\n✗ could not load the Hyperswarm transport (a native addon).');
+  console.error(`  reason: ${String(e.message).split('\n')[0]}`);
+  console.error('  The live mesh needs prebuilt native binaries — Node 20 or 22 is recommended (newer Node may lack a prebuild).');
+  console.error('  To prove the trust core WITHOUT the transport, run:  node verify.mjs');
+  process.exit(4);
+}
 
 const swarm = new Hyperswarm();
 let executed = 0;
