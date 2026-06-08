@@ -7,6 +7,9 @@
 ### The sovereign compute mesh. **Unlock the compute you already own.**
 
 <p>
+<a href="https://github.com/EfficientLabs-ai/TheAtmosphere/actions/workflows/ci.yml"><img src="https://github.com/EfficientLabs-ai/TheAtmosphere/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+</p>
+<p>
 <img src="https://img.shields.io/badge/license-BSL%201.1-2e8bff?style=for-the-badge" alt="License" />
 <img src="https://img.shields.io/badge/status-early%20access-5bc8ff?style=for-the-badge" alt="Status" />
 <img src="https://img.shields.io/badge/ports-zero%20open-0b0b0f?style=for-the-badge" alt="No open ports" />
@@ -90,17 +93,39 @@ capability.
 
 ## ⌨️ Run a node
 
-```bash
+**Instant proof — offline, no config, no network (~2s, any OS).** Verify the post-quantum seal that
+gates every skill the mesh will ever run:
+
+```sh
+cd node-runner
+npm install @noble/post-quantum   # the only dependency the proof needs
+node verify.mjs                   # 5 checks: the seal verifies; every tamper is refused
+```
+
+**Join a live mesh (advanced).** This needs the full transport (Hyperswarm — a native addon; **Node 20
+or 22 recommended**) and a **pinned origin key** to connect to. Create your config, then start.
+
+bash / zsh / macOS / Linux:
+
+```sh
 cd node-runner
 npm install
-cp config.example.json config.json   # set your topic + pinned origin key
-node mesh-node.mjs                    # join the mesh, stand by for verified skills
-node mesh-node.mjs --once            # run one verified skill and exit (proof mode)
+cp config.example.json config.json      # then set { topic, pinnedPubKey } — the origin you trust
+node mesh-node.mjs                       # join the mesh, stand by for verified skills
+```
+
+Windows PowerShell:
+
+```powershell
+cd node-runner
+npm install
+Copy-Item config.example.json config.json
+node mesh-node.mjs
 ```
 
 Attribute your contribution (public address only — never a key):
 
-```bash
+```sh
 node mesh-node.mjs --wallet <YOUR_PUBLIC_SOLANA_ADDRESS>
 ```
 
