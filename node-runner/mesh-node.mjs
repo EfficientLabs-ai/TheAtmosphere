@@ -22,7 +22,23 @@ import { parseCustomSection, findCustomSectionRange } from './wasm-sections.js';
 import { verifyPayload } from './quantum-crypto.js';
 
 const __dir = path.dirname(fileURLToPath(import.meta.url));
-const cfg = JSON.parse(fs.readFileSync(path.join(__dir, 'config.json'), 'utf8'));
+
+// Load config.json with a friendly message instead of a raw stack trace. A brand-new
+// user has no origin key to pin yet — point them at the offline proof, which needs no config.
+function loadConfig() {
+  const cfgPath = path.join(__dir, 'config.json');
+  if (!fs.existsSync(cfgPath)) {
+    console.error('✗ config.json not found next to mesh-node.mjs.');
+    console.error('  • To prove the trust core right now (no config, no network):  node verify.mjs');
+    console.error('  • To join a live mesh: copy config.example.json → config.json and set { topic, pinnedPubKey }.');
+    console.error('       bash/zsh:    cp config.example.json config.json');
+    console.error('       PowerShell:  Copy-Item config.example.json config.json');
+    process.exit(2);
+  }
+  try { return JSON.parse(fs.readFileSync(cfgPath, 'utf8')); }
+  catch (e) { console.error(`✗ could not parse config.json: ${e.message}`); process.exit(2); }
+}
+const cfg = loadConfig();
 
 const argv = process.argv.slice(2);
 const getArg = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? (argv[i + 1] ?? true) : d; };
