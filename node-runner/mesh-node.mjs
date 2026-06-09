@@ -57,6 +57,7 @@ function resolveWallet() {
   if (raw == null || raw === true) return null;          // absent → unattributed (graceful)
   const s = String(raw).trim();
   if (!s) return null;
+  if (s.includes('<')) return null;          // config.example.json placeholder (e.g. "<optional: …>") → join unattributed (graceful)
   if (!isValidSolanaAddress(s)) {
     console.error('✗ invalid --wallet / config.walletAddress: must be a valid Solana address (base58, 32-44 chars, no 0/O/I/l).');
     console.error('  Fix the address or omit it to join unattributed. Refusing to start.');
@@ -71,9 +72,20 @@ const topicKey = crypto.createHash('sha256').update(TOPIC_NAME).digest();
 
 // Pinned origin public key (Der buffers) — the cryptographic trust anchor.
 const decB = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, b4a.from(v, 'base64')]));
-const pinnedPub = decB(typeof cfg.pinnedPubKey === 'string'
-  ? JSON.parse(b4a.toString(b4a.from(cfg.pinnedPubKey, 'base64'), 'utf8'))
-  : cfg.pinnedPubKey);
+let pinnedPub;
+try {
+  if (cfg.pinnedPubKey == null || (typeof cfg.pinnedPubKey === 'string' && cfg.pinnedPubKey.includes('<'))) {
+    throw new Error('pinnedPubKey is missing or still set to the config.example.json placeholder');
+  }
+  pinnedPub = decB(typeof cfg.pinnedPubKey === 'string'
+    ? JSON.parse(b4a.toString(b4a.from(cfg.pinnedPubKey, 'base64'), 'utf8'))
+    : cfg.pinnedPubKey);
+} catch (e) {
+  console.error(`✗ config.json pinnedPubKey is not a valid origin key bundle: ${e.message}`);
+  console.error('  • Set pinnedPubKey to the base64 bundle from the origin you trust (see config.example.json / node-runner/README.md).');
+  console.error('  • To prove the trust core without any config or network, run:  node verify.mjs');
+  process.exit(2);
+}
 
 // Length-framed reader with a HARD size cap: a peer that declares an oversized frame gets
 // its socket destroyed before we ever buffer/allocate it (DoS guard on an untrusted stream).
