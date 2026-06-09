@@ -6,3 +6,6 @@ node_modules/
 *.pat
 .secrets-vault/
 .DS_Store
+
+# operator's mesh-node trust anchor (pinned origin key) — keep private. config.example.json stays tracked.
+node-runner/config.json
