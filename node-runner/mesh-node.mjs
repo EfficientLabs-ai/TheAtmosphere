@@ -177,8 +177,11 @@ try {
   Hyperswarm = require('hyperswarm');
 } catch (e) {
   console.error('\n✗ could not load the Hyperswarm transport (a native addon).');
-  console.error(`  reason: ${String(e.message).split('\n')[0]}`);
-  console.error('  The live mesh needs prebuilt native binaries — Node 20 or 22 is recommended (newer Node may lack a prebuild).');
+  const cause = e && (e.cause?.message || e.cause || e.code);
+  console.error(`  reason: ${String(e.message).split('\n')[0]}${cause ? `  (${String(cause).split('\n')[0]})` : ''}`);
+  console.error('  The native transport could not load on this machine. This is NOT necessarily the Node');
+  console.error('  version — common causes: an unsupported Node / missing prebuild (Node 20 or 22 are');
+  console.error('  known-good), OR a restricted exec environment (noexec /tmp, seccomp, or a glibc mismatch).');
   console.error('  To prove the trust core WITHOUT the transport, run:  node verify.mjs');
   process.exit(4);
 }
