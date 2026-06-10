@@ -157,7 +157,9 @@ function verifySignedSkill(wasm) {
   return verifyPayload(signedRegion, signatureBundle, pinnedPub);
 }
 
-const NODE_VERSION = '1.2.0'; // bumped when the bundle changes; origin can flag stale nodes.
+// Derived from package.json so the runtime banner can never drift from the published version
+// (audit §14: banner said 1.2.0 while the manifest said 1.0.0).
+const NODE_VERSION = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version;
 
 // Proof-of-capacity: the origin sends a random nonce + iteration count; we run a sha256 hash
 // CHAIN that many times (inherently sequential — can't be shortcut) and return the digest +
