@@ -4,6 +4,7 @@
   "type": "module",
   "description": "Atmosphere sovereign mesh node — joins the global Hyperswarm DHT (hole-punch, no open ports) and runs only PQC-verified skills.",
   "license": "BUSL-1.1",
+  "private": true,
   "homepage": "https://efficientlabs.ai",
   "repository": {
     "type": "git",
