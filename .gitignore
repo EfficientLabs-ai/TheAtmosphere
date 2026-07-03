@@ -9,3 +9,4 @@ node_modules/
 
 # operator's mesh-node trust anchor (pinned origin key) — keep private. config.example.json stays tracked.
 node-runner/config.json
+.gstack/
